@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Rest Place Searcher</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <link rel="stylesheet" th:href="@{/css/main.css}"
+          href="../../css/main.css"/>
+</head>
+<body>
+<input id="pac-input" class="controls" type="text" placeholder="Enter a location"/>
+<input id="radius" class="controls" type="text" placeholder="Enter a radius"/>
+<button id="search" type="submit">Search</button>
+<div id="map"></div>
+<div id="infowindow-content">
+    <span id="place-name" class="title"></span><br/>
+    Place ID <span id="place-id"></span><br/>
+    <span id="place-address"></span>
+</div>
+<script th:inline="javascript">
+
+    /*<![CDATA[*/
+
+    let map;
+    let markers;
+    let autocomplete;
+    let place;
+    let initLat;
+    let initLng;
+
+    function initMap() {
+        map = new google.maps.Map(document.getElementById('map'), {
+            center: {lat: 53.200, lng: 50.150},
+            zoom: 13
+        });
+        var inputLocation = document.getElementById('pac-input');
+        var searchButton = document.getElementById('search');
+        var inputRadius = document.getElementById('radius');
+
+        autocomplete = new google.maps.places.Autocomplete(inputLocation);
+        autocomplete.bindTo('bounds', map);
+
+        map.controls[google.maps.ControlPosition.TOP_LEFT].push(inputLocation);
+        map.controls[google.maps.ControlPosition.TOP_LEFT].push(searchButton);
+        map.controls[google.maps.ControlPosition.TOP_LEFT].push(inputRadius);
+
+        var infowindow = new google.maps.InfoWindow();
+//        var marker = new google.maps.Marker({
+//            map: map
+//        });
+//        marker.addListener('click', function() {
+//            infowindow.open(map, marker);
+//        });
+        autocomplete.addListener('place_changed', function () {
+            place = autocomplete.getPlace();
+            if (!place.geometry) {
+                return;
+            }
+            initLat = place.geometry.location.lat;
+            initLng = place.geometry.location.lng;
+            console.log(initLat())
+        });
+        searchButton.addEventListener("click", fetchFunction);
+
+        function fetchFunction(evt) {
+            evt.preventDefault();
+//            infowindow.close();
+//            var place = autocomplete.getPlace();
+//            if (!place.geometry) {
+//                return;
+//            }
+            fetch(`/api/places/find?lat=${initLat()}&lng=${initLng()}&radius=${inputRadius.value}`)
+                .then(function (response) {
+                    return response.json();
+                }).then(plotMarkers);
+        }
+        function plotMarkers(places) {
+
+            if(markers) {
+                for (var i = 0; i < markers.length; i++) {
+                    markers[i].setMap(null);
+                }
+            }
+
+            markers = [];
+            bounds = new google.maps.LatLngBounds();
+            console.log(map);
+
+            places.forEach(function (p) {
+                //create text windows for marker
+                var contentString = `Name: ${p.name}<br>
+                Found at Location: ${p.geometry.location.lat}, ${p.geometry.location.lng}
+                `;
+                var position = new google.maps.LatLng(p.geometry.location.lat, p.geometry.location.lng);
+                var infoWindow = new google.maps.InfoWindow({
+                    content: contentString
+                });
+
+                var marker = new google.maps.Marker({
+                    position: position,
+                    map: map,
+//                    animation: google.maps.Animation.DROP,
+                    infoWindow: infoWindow
+                });
+                marker.addListener("mouseover", () => {
+                    infoWindow.open(map, marker);
+                });
+                marker.addListener("mouseout", () => {
+                    infoWindow.close(map, marker);
+                });
+                markers.push(
+                    marker
+                );
+                bounds.extend(position);
+            })
+            //        map.fitBounds(bounds);
+        }
+//        autocomplete.addListener('place_changed', function() {
+//            infowindow.close();
+//            var place = autocomplete.getPlace();
+//            if (!place.geometry) {
+//                return;
+//            }
+//
+//            if (place.geometry.viewport) {
+//                map.fitBounds(place.geometry.viewport);
+//            } else {
+//                map.setCenter(place.geometry.location);
+//                map.setZoom(17);
+//            }
+//
+//             Set the position of the marker using the place ID and location.
+//            marker.setPlace({
+//                placeId: place.place_id,
+//                location: place.geometry.location
+//            });
+//            marker.setVisible(true);
+//
+//            document.getElementById('place-name').textContent = place.name;
+//            document.getElementById('place-id').textContent = place.place_id;
+//            document.getElementById('place-address').textContent =
+//                place.formatted_address;
+//            infowindow.setContent(document.getElementById('infowindow-content'));
+//            infowindow.open(map, marker);
+//        });
+    }
+
+    /*]]>*/
+</script>
+<script async="async" defer="defer"
+        th:src="|https://maps.googleapis.com/maps/api/js?key=AIzaSyBcxdBvCWJNpPp7eghSmVLxweeiYcF23MQ&amp;libraries=places&amp;callback=initMap|">
+</script>
+</body>
+</html>
