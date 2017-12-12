@@ -7,9 +7,17 @@
           href="../../css/main.css"/>
 </head>
 <body>
+<div id="listPlaces">
+    <ul>
+
+    </ul>
+</div>
+
 <input id="pac-input" class="controls input-row _location" type="text" placeholder="Enter a location"/>
 <input id="radius" class="controls input-row _radius" type="text" placeholder="Enter a radius"/>
 <button id="search" class="button-simple" type="submit">Search</button>
+<!--made invinsible at first-->
+<button id="searchNext" type="submit">Search next 20 places</button>
 <div id="map"></div>
 <div id="infowindow-content">
     <span id="place-name" class="title"></span><br/>
@@ -26,6 +34,7 @@
     let place;
     let initLat;
     let initLng;
+    let nextPageToken;
 
     function initMap() {
         map = new google.maps.Map(document.getElementById('map'), {
@@ -34,14 +43,16 @@
         });
         var inputLocation = document.getElementById('pac-input');
         var searchButton = document.getElementById('search');
+        var searchNextPlacesButton = document.getElementById('searchNext');
         var inputRadius = document.getElementById('radius');
 
         autocomplete = new google.maps.places.Autocomplete(inputLocation);
         autocomplete.bindTo('bounds', map);
 
         map.controls[google.maps.ControlPosition.TOP_LEFT].push(inputLocation);
-        map.controls[google.maps.ControlPosition.TOP_LEFT].push(searchButton);
         map.controls[google.maps.ControlPosition.TOP_LEFT].push(inputRadius);
+        map.controls[google.maps.ControlPosition.TOP_LEFT].push(searchButton);
+        map.controls[google.maps.ControlPosition.TOP_LEFT].push(searchNextPlacesButton);
 
         var infowindow = new google.maps.InfoWindow();
 //        var marker = new google.maps.Marker({
@@ -60,16 +71,20 @@
             console.log(initLat())
         });
         searchButton.addEventListener("click", fetchFunction);
+        searchNextPlacesButton.addEventListener("click", fetchNextFunction);
 
         function fetchFunction(evt) {
             evt.preventDefault();
-//            infowindow.close();
-//            var place = autocomplete.getPlace();
-//            if (!place.geometry) {
-//                return;
-//            }
             fetch(`/api/places/find?lat=${initLat()}&lng=${initLng()}&radius=${inputRadius.value}`)
                 .then(function (response) {
+                    return response.json();
+                }).then(plotMarkers);
+        }
+        function fetchNextFunction(evt) {
+            evt.preventDefault();
+            fetch(`/api/places/findNext?nextPageToken=${nextPageToken}`)
+                .then(function (response) {
+                    $("#listPlaces ul li").remove();
                     return response.json();
                 }).then(plotMarkers);
         }
@@ -85,7 +100,10 @@
             bounds = new google.maps.LatLngBounds();
             console.log(map);
 
-            places.forEach(function (p) {
+            nextPageToken = places.nextPageToken;
+            console.log(nextPageToken);
+
+            places.results.forEach(function (p) {
                 //create text windows for marker
                 var contentString = `Name: ${p.name}<br>
                 Found at Location: ${p.geometry.location.lat}, ${p.geometry.location.lng}
@@ -111,8 +129,17 @@
                     marker
                 );
                 bounds.extend(position);
+                map.fitBounds(bounds);
+                $("#listPlaces ul").append(
+                    $('<li>').append(
+                        $('<img>').attr('src', p.icon.toString())
+                    ).append(
+                        $('<h3>').append(p.name)
+                    ).append(
+                        $('<p>').append(p.vicinity)
+                    )
+                );
             })
-            //        map.fitBounds(bounds);
         }
 //        autocomplete.addListener('place_changed', function() {
 //            infowindow.close();
@@ -149,5 +176,6 @@
 <script async="async" defer="defer"
         th:src="|https://maps.googleapis.com/maps/api/js?key=AIzaSyBcxdBvCWJNpPp7eghSmVLxweeiYcF23MQ&amp;libraries=places&amp;callback=initMap|">
 </script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 </body>
 </html>

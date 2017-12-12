@@ -22,7 +22,7 @@ public class RestServiceApplication {
 	public CommandLineRunner commandLineRunner(ApplicationContext context) {
 		return args -> {
 //			System.out.println("Start using Google Maps service");
-//			PlacesSearchResponse places = googleMapsService.findPlaces("-33.8670522", "151.1957362");
+//			PlacesSearchResponse places = googleMapsService.findPlaces("-33.8670522", "151.1957362", 500);
 //			Gson gson = new GsonBuilder().create();
 //			for (PlacesSearchResult result : places.results) {
 //				System.out.println(result.name);
