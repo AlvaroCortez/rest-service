@@ -1,15 +1,4 @@
-#map {
-    height: 100%;
-    margin-left: 20%;
-    display: inline-block;
-}
-#listPlaces {
-    display: inline-block;
-}
-div {
-    margin: 20px;
-}
-/* Optional: Makes the sample page fill the window. */
+
 html, body {
     height: 100%;
     margin: 0;
@@ -18,12 +7,12 @@ html, body {
 
 .input-row._radius{
     left: 490px !important;
-    top: 3px !important;
+    top: 0 !important;
 }
 
 .input-row._location{
     left: 135px !important;
-    top: 3px !important;
+    top: 0 !important;
 }
 
 .input-row{
@@ -39,13 +28,20 @@ html, body {
 }
 
 .button-simple{
-    left: 860px !important;
-    top: 13px !important;
+    top: 9px !important;
     height: 30px;
     background-color: #48afa1;
     border: 1px solid #418678;
     border-radius: 4px;
     color: white;
+}
+
+.button-simple.search{
+    left: 860px !important;
+}
+
+.button-simple.search-next{
+    left: 935px !important;
 }
 
 .controls {
@@ -67,12 +63,6 @@ html, body {
 .title {
     font-weight: bold;
 }
-#infowindow-content {
-    display: none;
-}
-#map #infowindow-content {
-    display: inline;
-}
 
 .button-simple {
     left: 600px;
@@ -80,28 +70,70 @@ html, body {
 }
 ul {
     list-style-type: none;
-    width: 500px;
-}
-
-h3 {
-    font: bold 20px/1.5 Helvetica, Verdana, sans-serif;
-}
-
-li img {
-    float: left;
-    margin: 0 15px 0 0;
-}
-
-li p {
-    font: 200 12px/1.5 Georgia, Times New Roman, serif;
-}
-
-li {
-    padding: 10px;
+    margin-top: 0;
+    height: 600px;
     overflow: auto;
+    position: relative;
 }
 
 li:hover {
     background: #eee;
     cursor: pointer;
+}
+#map{
+    height: 600px;
+    width: 60%;
+    display: inline-block;
+}
+
+#listPlaces {
+     display: inline-block;
+     width: 30%;
+     height: 100%;
+     vertical-align: top;
+     float: left;
+ }
+
+#listPlaces img{
+    width: 20px;
+    display: inline-block;
+}
+
+#listPlaces p{
+    margin: 0 0 0 36px;
+    font: 200 12px/1.5 Georgia, Times New Roman, serif;
+}
+
+#listPlaces h3{
+    display: inline-block;
+    font: bold 16px/1.5 Helvetica, Verdana, sans-serif;
+    margin: 0 0 0 15px;
+}
+
+#listPlaces li{
+    padding: 5px 10px;
+}
+
+#infowindow-content{
+    display: none;
+}
+::-webkit-scrollbar{
+    width:12px;
+}
+::-webkit-scrollbar-thumb:hover{
+    border-width: 1px 1px 1px 2px;
+    border-color: #555;
+    background-color: #777;
+}
+::-webkit-scrollbar-thumb:hover{
+    border-width: 1px 1px 1px 2px;
+    border-color: #555;
+    background-color: #777;
+}
+::-webkit-scrollbar-track{
+    border-width:0;
+}
+::-webkit-scrollbar-track:hover{
+    border-left: solid 1px #aaa;
+    background-color: #eee;
 }
