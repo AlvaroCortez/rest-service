@@ -16,12 +16,31 @@
     </ul>
 </div>
 <div class="controls">
-
 </div>
+
+<div id="data-container"></div>
+<div id="pagination-container"></div>
+<button id="sortByDistance" class="button-simple search" type="submit">Top Distance</button>
+<button id="sortByDistanceUI" class="button-simple search" type="submit">Top Distance UI</button>
 <input id="pac-input" class="controls input-row _location" type="text" placeholder="Enter a location"/>
-<input id="radius" class="controls input-row _radius" type="text" placeholder="Enter a radius"/>
+<input id="radius" class="controls input-row _radius" type="text" placeholder="Enter a radius(m)"/>
+<input id="duration" class="controls input-row _duration" type="text" placeholder="Enter a duration(h)"/>
+<select id="type">
+    <!--<option selected="selected" value="">All</option>-->
+    <option value="amusement_park">Amusement Park</option>
+    <option value="art_gallery">Art Gallery</option>
+    <option value="beauty_salon">Beauty Salon</option>
+    <option selected="selected" value="cafe">Cafe</option>
+    <option value="casino">Casino</option>
+    <option value="movie_theater">Movie Theater</option>
+    <option value="museum">Museum</option>
+    <option value="night_club">Night Club</option>
+    <option value="restaurant">Restaurant</option>
+    <option value="spa">Spa</option>
+    <option value="zoo">Zoo</option>
+</select>
 <button id="search" class="button-simple search" type="submit">Search</button>
-<button id="searchNext" type="submit" class="button-simple search-next">Search next 20 places</button>
+<!--<button id="searchNext" type="submit" class="button-simple search-next">Search next 20 places</button>-->
 <div id="map"></div>
 <div id="infowindow-content">
     <span id="place-name" class="title"></span><br/>
@@ -43,6 +62,7 @@
     let initLat;
     let initLng;
     let nextPageToken;
+    let allPlaces;
 
     function initMap() {
         map = new google.maps.Map(document.getElementById('map'), {
@@ -51,24 +71,23 @@
         });
         var inputLocation = document.getElementById('pac-input');
         var searchButton = document.getElementById('search');
-        var searchNextPlacesButton = document.getElementById('searchNext');
+//        var searchNextPlacesButton = document.getElementById('searchNext');
         var inputRadius = document.getElementById('radius');
+        var inputDuration = document.getElementById('duration');
+        var selectType = document.getElementById('type');
+        var sortByDistanceButton = document.getElementById('sortByDistance');
+        var sortByDistanceButtonUI = document.getElementById('sortByDistanceUI');
 
         autocomplete = new google.maps.places.Autocomplete(inputLocation);
         autocomplete.bindTo('bounds', map);
 
         map.controls[google.maps.ControlPosition.TOP_LEFT].push(inputLocation);
         map.controls[google.maps.ControlPosition.TOP_LEFT].push(inputRadius);
+        map.controls[google.maps.ControlPosition.TOP_LEFT].push(inputDuration);
+        map.controls[google.maps.ControlPosition.TOP_LEFT].push(selectType);
         map.controls[google.maps.ControlPosition.TOP_LEFT].push(searchButton);
-        map.controls[google.maps.ControlPosition.TOP_LEFT].push(searchNextPlacesButton);
+//        map.controls[google.maps.ControlPosition.TOP_LEFT].push(searchNextPlacesButton);
 
-        var infowindow = new google.maps.InfoWindow();
-//        var marker = new google.maps.Marker({
-//            map: map
-//        });
-//        marker.addListener('click', function() {
-//            infowindow.open(map, marker);
-//        });
         autocomplete.addListener('place_changed', function () {
             place = autocomplete.getPlace();
             if (!place.geometry) {
@@ -79,25 +98,112 @@
             console.log(initLat())
         });
         searchButton.addEventListener("click", fetchFunction);
-        searchNextPlacesButton.addEventListener("click", fetchNextFunction);
+        sortByDistanceButton.addEventListener("click", fetchsortFunction);
+        sortByDistanceButtonUI.addEventListener("click", sortUI);
+//        searchNextPlacesButton.addEventListener("click", fetchNextFunction);
 
         function fetchFunction(evt) {
             evt.preventDefault();
-            fetch(`/api/places/find?lat=${initLat()}&lng=${initLng()}&radius=${inputRadius.value}`)
+            fetch(`/api/places/find?lat=${initLat()}&lng=${initLng()}&radius=${inputRadius.value}&duration=${inputDuration.value}&type=${selectType.value}`)
                 .then(function (response) {
                     return response.json();
                 }).then(plotMarkers);
         }
-        function fetchNextFunction(evt) {
+
+        function fetchsortFunction(evt) {
             evt.preventDefault();
-            fetch(`/api/places/findNext?nextPageToken=${nextPageToken}`)
+            fetch(`/api/places/sortByDistance?lat=${initLat()}&lng=${initLng()}&radius=${inputRadius.value}&duration=${inputDuration.value}&type=${selectType.value}`)
                 .then(function (response) {
-                    $("#listPlaces ul li").remove();
                     return response.json();
                 }).then(plotMarkers);
         }
+
+        function sortUI(){
+            allPlaces.sort(function (a, b) {
+                return a.distanceInMeters - b.distanceInMeters;
+            });
+            var sortedPlaces = allPlaces;
+            $('#pagination-container').pagination({
+                dataSource: sortedPlaces,
+                pageSize: 20,
+                callback: function(data, pagination) {
+                    var html = simpleTemplating(data);
+                    $('#data-container').html(html);
+                }
+            })
+        }
+//        function fetchNextFunction(evt) {
+//            evt.preventDefault();
+//            fetch(`/api/places/findNext?nextPageToken=${nextPageToken}`)
+//                .then(function (response) {
+//                    $("#listPlaces ul li").remove();
+//                    return response.json();
+//                }).then(plotMarkers);
+//        }
         function plotMarkers(places) {
 
+            allPlaces = places;
+//            if(markers) {
+//                for (var i = 0; i < markers.length; i++) {
+//                    markers[i].setMap(null);
+//                }
+//            }
+//
+//            markers = [];
+//            bounds = new google.maps.LatLngBounds();
+
+//            nextPageToken = places.nextPageToken;
+//            console.log(nextPageToken);
+
+//            places.results.forEach(function (p) {
+            //create text windows for marker
+//                var contentString = `Name: ${p.name}<br>
+//                Found at Location: ${p.geometry.location.lat}, ${p.geometry.location.lng}
+//                `;
+//                var position = new google.maps.LatLng(p.geometry.location.lat, p.geometry.location.lng);
+//                var infoWindow = new google.maps.InfoWindow({
+//                    content: contentString
+//                });
+//
+//                var marker = new google.maps.Marker({
+//                    position: position,
+//                    map: map,
+//                    infoWindow: infoWindow
+//                });
+//                marker.addListener("mouseover", () => {
+//                    infoWindow.open(map, marker);
+//                });
+//                marker.addListener("mouseout", () => {
+//                    infoWindow.close(map, marker);
+//                });
+//                markers.push(
+//                    marker
+//                );
+//                bounds.extend(position);
+//                map.fitBounds(bounds);
+//                $("#listPlaces ul").append(
+//                    $('<li>').append(
+//                        $('<img>').attr('src', p.icon.toString())
+//                    ).append(
+//                        $('<h3>').append(p.name)
+//                    ).append(
+//                        $('<p>').append(p.vicinity)
+//                    )
+//                );
+//            })
+
+
+            $('#pagination-container').pagination({
+                dataSource: places,
+                pageSize: 20,
+                callback: function(data, pagination) {
+                    var html = simpleTemplating(data);
+                    $('#data-container').html(html);
+                }
+            })
+        }
+
+        function simpleTemplating(data) {
             if(markers) {
                 for (var i = 0; i < markers.length; i++) {
                     markers[i].setMap(null);
@@ -106,25 +212,31 @@
 
             markers = [];
             bounds = new google.maps.LatLngBounds();
-            console.log(map);
 
-            nextPageToken = places.nextPageToken;
-            console.log(nextPageToken);
-
-            places.results.forEach(function (p) {
-                //create text windows for marker
+            var html = '<ul>';
+            $.each(data, function (index, p) {
+                html += '<li>';
+                html += '<img src="' + p.icon.toString() + '" />';
+                html += '<h3>' + p.name + '</h3>';
+                html += '<p>' + p.address + '</p>';
+                html += '<p> Cost: ' + p.price + '</p>';
+                html += '<p> Distance(m): ' + p.distanceInMeters + '</p>';
+                html += '<p> Duration(s): ' + p.durationInSeconds + '</p>';
+                html += '</li>';
                 var contentString = `Name: ${p.name}<br>
-                Found at Location: ${p.geometry.location.lat}, ${p.geometry.location.lng}
+                Found at Location: ${p.lat}, ${p.lng}
                 `;
-                var position = new google.maps.LatLng(p.geometry.location.lat, p.geometry.location.lng);
+                var position = new google.maps.LatLng(p.lat, p.lng);
                 var infoWindow = new google.maps.InfoWindow({
                     content: contentString
                 });
+                console.log(index)
+                console.log(position.lat());
+                console.log(position.lng());
 
                 var marker = new google.maps.Marker({
                     position: position,
                     map: map,
-//                    animation: google.maps.Animation.DROP,
                     infoWindow: infoWindow
                 });
                 marker.addListener("mouseover", () => {
@@ -138,45 +250,10 @@
                 );
                 bounds.extend(position);
                 map.fitBounds(bounds);
-                $("#listPlaces ul").append(
-                    $('<li>').append(
-                        $('<img>').attr('src', p.icon.toString())
-                    ).append(
-                        $('<h3>').append(p.name)
-                    ).append(
-                        $('<p>').append(p.vicinity)
-                    )
-                );
-            })
+            });
+            html += '</ul>';
+            return html;
         }
-//        autocomplete.addListener('place_changed', function() {
-//            infowindow.close();
-//            var place = autocomplete.getPlace();
-//            if (!place.geometry) {
-//                return;
-//            }
-//
-//            if (place.geometry.viewport) {
-//                map.fitBounds(place.geometry.viewport);
-//            } else {
-//                map.setCenter(place.geometry.location);
-//                map.setZoom(17);
-//            }
-//
-//             Set the position of the marker using the place ID and location.
-//            marker.setPlace({
-//                placeId: place.place_id,
-//                location: place.geometry.location
-//            });
-//            marker.setVisible(true);
-//
-//            document.getElementById('place-name').textContent = place.name;
-//            document.getElementById('place-id').textContent = place.place_id;
-//            document.getElementById('place-address').textContent =
-//                place.formatted_address;
-//            infowindow.setContent(document.getElementById('infowindow-content'));
-//            infowindow.open(map, marker);
-//        });
     }
 
     /*]]>*/
@@ -185,5 +262,6 @@
         th:src="|https://maps.googleapis.com/maps/api/js?key=AIzaSyBcxdBvCWJNpPp7eghSmVLxweeiYcF23MQ&amp;libraries=places&amp;callback=initMap|">
 </script>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script src="http://pagination.js.org/dist/2.1.0/pagination.js"></script>
 </body>
 </html>

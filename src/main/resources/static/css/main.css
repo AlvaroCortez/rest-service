@@ -81,12 +81,12 @@ li:hover {
     cursor: pointer;
 }
 #map{
-    height: 600px;
+    height: 100%;
     width: 60%;
     display: inline-block;
 }
 
-#listPlaces {
+#data-container {
      display: inline-block;
      width: 30%;
      height: 100%;
@@ -94,23 +94,31 @@ li:hover {
      float: left;
  }
 
-#listPlaces img{
+#pagination-container {
+    display: inline-block;
+    width: 30%;
+    height: 100%;
+    vertical-align: top;
+    float: left;
+}
+
+#data-container img{
     width: 20px;
     display: inline-block;
 }
 
-#listPlaces p{
+#data-container p{
     margin: 0 0 0 36px;
     font: 200 12px/1.5 Georgia, Times New Roman, serif;
 }
 
-#listPlaces h3{
+#data-container h3{
     display: inline-block;
     font: bold 16px/1.5 Helvetica, Verdana, sans-serif;
     margin: 0 0 0 15px;
 }
 
-#listPlaces li{
+#data-container li{
     padding: 5px 10px;
 }
 
