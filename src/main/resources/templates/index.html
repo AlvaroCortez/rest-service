@@ -67,7 +67,6 @@
     let place;
     let initLat;
     let initLng;
-    let nextPageToken;
     let allPlaces;
 
     function initMap() {
@@ -81,6 +80,7 @@
         var inputDuration = document.getElementById('duration');
         var selectType = document.getElementById('type');
         var sortByDistanceButtonUI = document.getElementById('sortByDistanceUI');
+        var sortByDurationButtonUI = document.getElementById('sortByDurationUI');
         var luckySearchButton = document.getElementById('luckySearch');
         var inputCarGasolinePrice = document.getElementById('carGasolinePrice');
         var inputCarGasolineConsumption = document.getElementById('carGasolineConsumption');
@@ -109,7 +109,8 @@
             console.log(initLat())
         });
         searchButton.addEventListener("click", fetchPlaces);
-        sortByDistanceButtonUI.addEventListener("click", sortUI);
+        sortByDistanceButtonUI.addEventListener("click", sortByDistanceUI);
+        sortByDurationButtonUI.addEventListener("click", sortByDurationUI);
 
         function fetchPlaces(evt) {
             evt.preventDefault();
@@ -120,13 +121,13 @@
         }
 
 
-        function sortUI(){
+        function sortByDistanceUI(){
             allPlaces.sort(function (a, b) {
-                return a.distanceInMeters - b.distanceInMeters;
+                return a.distance.inMeters - b.distance.inMeters;
             });
-            var sortedPlaces = allPlaces;
+//            var sortedPlaces = allPlaces;
             $('#pagination-container').pagination({
-                dataSource: sortedPlaces,
+                dataSource: allPlaces,
                 pageSize: 20,
                 callback: function(data, pagination) {
                     var html = renderPlaces(data);
@@ -134,6 +135,22 @@
                 }
             })
         }
+
+        function sortByDurationUI(){
+            allPlaces.sort(function (a, b) {
+                return a.duration.inSeconds - b.duration.inSeconds;
+            });
+//            var sortedPlaces = allPlaces;
+            $('#pagination-container').pagination({
+                dataSource: allPlaces,
+                pageSize: 20,
+                callback: function(data, pagination) {
+                    var html = renderPlaces(data);
+                    $('#data-container').html(html);
+                }
+            })
+        }
+
         function addPlaces(places) {
 
             allPlaces = places;
@@ -164,9 +181,9 @@
                 html += '<img src="' + p.icon.toString() + '" />';
                 html += '<h3>' + p.name + '</h3>';
                 html += '<p>' + p.address + '</p>';
-                html += '<p> Cost: ' + p.price + '</p>';
-                html += '<p> Distance(m): ' + p.distanceInMeters + '</p>';
-                html += '<p> Duration(s): ' + p.durationInSeconds + '</p>';
+                html += '<p> Cost: ' + p.price + 'р </p>';
+                html += '<p> Distance: ' + p.distance.humanReadable + '</p>';
+                html += '<p> Duration: ' + p.duration.humanReadable + '</p>';
                 html += '</li>';
                 var contentString = `Name: ${p.name}<br>
                 Found at Location: ${p.lat}, ${p.lng}

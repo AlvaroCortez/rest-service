@@ -1,5 +1,7 @@
 package com.netcracker.rest.restservice.model;
 
+import com.google.maps.model.Distance;
+import com.google.maps.model.Duration;
 import lombok.AllArgsConstructor;
 
 import java.math.BigDecimal;
@@ -12,7 +14,7 @@ public class Place {
     public String name;
     public String address;
     public URL icon;
-    public long durationInSeconds;
-    public long distanceInMeters;
+    public Duration duration;
+    public Distance distance;
     public BigDecimal price;
 }

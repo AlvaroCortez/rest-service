@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @Slf4j
@@ -45,10 +46,12 @@ public class GoogleMapsService {
                 type(PlaceType.valueOf(type.toUpperCase())).
                 await();
         places.addAll(filterDuration(placesSearchResponse, currentPosition, hoursInSeconds));
-        while (placesSearchResponse.nextPageToken != null) {
+        while (placesSearchResponse != null && placesSearchResponse.nextPageToken != null) {
             placesSearchResponse = PlacesApi.nearbySearchNextPage(context, placesSearchResponse.nextPageToken)
                     .awaitIgnoreError();
-            places.addAll(filterDuration(placesSearchResponse, currentPosition, hoursInSeconds));
+            if(placesSearchResponse != null) {
+                places.addAll(filterDuration(placesSearchResponse, currentPosition, hoursInSeconds));
+            }
         }
 //      DistanceMatrix matrix = DistanceMatrixApi.newRequest(context).origins(currentPosition).destinations().await();
         return places;
@@ -59,21 +62,31 @@ public class GoogleMapsService {
                                        long hoursInSeconds
     ) throws InterruptedException, ApiException, IOException {
         List<Place> places = new ArrayList<>();
+        int countPlaces = placesSearchResponse.results.length;
+        if(countPlaces == 0) {
+            return Collections.emptyList();
+        }
+        LatLng[] locations = new LatLng[countPlaces];
+        for (int i = 0; i < countPlaces; i++) {
+            locations[i] = placesSearchResponse.results[i].geometry.location;
+        }
+        DistanceMatrix matrix = DistanceMatrixApi.newRequest(context)
+                .origins(currentPosition)
+                .destinations(locations)
+                .await();
+        int i = 0;
         for (PlacesSearchResult result : placesSearchResponse.results) {
-            DistanceMatrix matrix = DistanceMatrixApi.newRequest(context)
-                    .origins(currentPosition)
-                    .destinations(result.geometry.location)
-                    .await();
-            if (matrix.rows[0].elements[0].duration.inSeconds < hoursInSeconds) {
-                long longPrice = (long) (matrix.rows[0].elements[0].distance.inMeters * AVERAGE_PRICE_OF_GASOLINE / METERS_PER_KILOMETER * LITERS_PER_KILOMETER);
+            DistanceMatrixElement destinationPlace = matrix.rows[0].elements[i++];
+            if (destinationPlace.duration.inSeconds < hoursInSeconds) {
+                long longPrice = (long) (destinationPlace.distance.inMeters * AVERAGE_PRICE_OF_GASOLINE / METERS_PER_KILOMETER * LITERS_PER_KILOMETER);
                 BigDecimal price = BigDecimal.valueOf(longPrice);
                 Place place = new Place(result.geometry.location.lat,
                                         result.geometry.location.lng,
                                         result.name,
                                         result.vicinity,
                                         result.icon,
-                                        matrix.rows[0].elements[0].duration.inSeconds,
-                                        matrix.rows[0].elements[0].distance.inMeters,
+                                        destinationPlace.duration,
+                                        destinationPlace.distance,
                                         price
                 );
                 places.add(place);
