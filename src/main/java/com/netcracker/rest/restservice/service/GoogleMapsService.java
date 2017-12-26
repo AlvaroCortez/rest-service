@@ -81,14 +81,4 @@ public class GoogleMapsService {
         }
         return places;
     }
-
-
-    public PlacesSearchResponse findPlacesNextPage(String nextPageToken) {
-        try {
-            return PlacesApi.nearbySearchNextPage(context, nextPageToken).await();
-        } catch (ApiException | InterruptedException | IOException e) {
-            e.printStackTrace();
-            return new PlacesSearchResponse();
-        }
-    }
 }

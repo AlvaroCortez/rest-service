@@ -20,11 +20,11 @@
 
 <div id="data-container"></div>
 <div class="sort-buttons__container">
-    <button id="sortByDistance" class="button-simple search" type="submit">Top Distance</button>
-    <button id="sortByDistanceUI" class="button-simple search" type="submit">Top Distance UI</button>
+    <button id="sortByDistanceUI" class="button-simple search" type="submit">Top Distance</button>
+    <button id="sortByDurationUI" class="button-simple search" type="submit">Top Duration</button>
 </div>
 <div id="pagination-container"></div>
-<input id="pac-input" class="controls input-row _location" type="text" placeholder="Enter a location"/>
+<input id="placeLocation" class="controls input-row _location" type="text" placeholder="Enter a location"/>
 <input id="radius" class="controls input-row _radius" type="text" placeholder="Enter a radius(m)"/>
 <input id="duration" class="controls input-row _duration" type="text" placeholder="Enter a duration(h)"/>
 <select id="type" class="controls select-simple _place-type">
@@ -42,7 +42,10 @@
     <option value="zoo">Zoo</option>
 </select>
 <button id="search" class="button-simple search" type="submit">Search</button>
-<!--<button id="searchNext" type="submit" class="button-simple search-next">Search next 20 places</button>-->
+<input id="carGasolinePrice" class="controls input-row" type="text" placeholder="Enter a car gasoline price"/>
+<input id="carGasolineConsumption" class="controls input-row" type="text" placeholder="Enter a car gasoline consumtion"/>
+<input id="carAverageSpeed" class="controls input-row" type="text" placeholder="Enter a car average speed"/>
+<button id="luckySearch" class="button-simple search" type="submit">I'm lucky!</button>
 <div id="map"></div>
 <div id="infowindow-content">
     <span id="place-name" class="title"></span><br/>
@@ -71,14 +74,16 @@
             center: {lat: 53.200, lng: 50.150},
             zoom: 13
         });
-        var inputLocation = document.getElementById('pac-input');
+        var inputLocation = document.getElementById('placeLocation');
         var searchButton = document.getElementById('search');
-//        var searchNextPlacesButton = document.getElementById('searchNext');
         var inputRadius = document.getElementById('radius');
         var inputDuration = document.getElementById('duration');
         var selectType = document.getElementById('type');
-        var sortByDistanceButton = document.getElementById('sortByDistance');
         var sortByDistanceButtonUI = document.getElementById('sortByDistanceUI');
+        var luckySearchButton = document.getElementById('luckySearch');
+        var inputCarGasolinePrice = document.getElementById('carGasolinePrice');
+        var inputCarGasolineConsumption = document.getElementById('carGasolineConsumption');
+        var inputCarAverageSpeed = document.getElementById('carAverageSpeed');
 
         autocomplete = new google.maps.places.Autocomplete(inputLocation);
         autocomplete.bindTo('bounds', map);
@@ -87,8 +92,11 @@
         map.controls[google.maps.ControlPosition.TOP_LEFT].push(inputRadius);
         map.controls[google.maps.ControlPosition.TOP_LEFT].push(inputDuration);
         map.controls[google.maps.ControlPosition.TOP_LEFT].push(selectType);
+        map.controls[google.maps.ControlPosition.TOP_LEFT].push(inputCarGasolinePrice);
+        map.controls[google.maps.ControlPosition.TOP_LEFT].push(inputCarGasolineConsumption);
+        map.controls[google.maps.ControlPosition.TOP_LEFT].push(inputCarAverageSpeed);
         map.controls[google.maps.ControlPosition.TOP_LEFT].push(searchButton);
-//        map.controls[google.maps.ControlPosition.TOP_LEFT].push(searchNextPlacesButton);
+        map.controls[google.maps.ControlPosition.TOP_RIGHT].push(luckySearchButton);
 
         autocomplete.addListener('place_changed', function () {
             place = autocomplete.getPlace();
@@ -99,26 +107,17 @@
             initLng = place.geometry.location.lng;
             console.log(initLat())
         });
-        searchButton.addEventListener("click", fetchFunction);
-        sortByDistanceButton.addEventListener("click", fetchsortFunction);
+        searchButton.addEventListener("click", fetchPlaces);
         sortByDistanceButtonUI.addEventListener("click", sortUI);
-//        searchNextPlacesButton.addEventListener("click", fetchNextFunction);
 
-        function fetchFunction(evt) {
+        function fetchPlaces(evt) {
             evt.preventDefault();
             fetch(`/api/places/find?lat=${initLat()}&lng=${initLng()}&radius=${inputRadius.value}&duration=${inputDuration.value}&type=${selectType.value}`)
                 .then(function (response) {
                     return response.json();
-                }).then(plotMarkers);
+                }).then(addPlaces);
         }
 
-        function fetchsortFunction(evt) {
-            evt.preventDefault();
-            fetch(`/api/places/sortByDistance?lat=${initLat()}&lng=${initLng()}&radius=${inputRadius.value}&duration=${inputDuration.value}&type=${selectType.value}`)
-                .then(function (response) {
-                    return response.json();
-                }).then(plotMarkers);
-        }
 
         function sortUI(){
             allPlaces.sort(function (a, b) {
@@ -129,83 +128,26 @@
                 dataSource: sortedPlaces,
                 pageSize: 20,
                 callback: function(data, pagination) {
-                    var html = simpleTemplating(data);
+                    var html = renderPlaces(data);
                     $('#data-container').html(html);
                 }
             })
         }
-//        function fetchNextFunction(evt) {
-//            evt.preventDefault();
-//            fetch(`/api/places/findNext?nextPageToken=${nextPageToken}`)
-//                .then(function (response) {
-//                    $("#listPlaces ul li").remove();
-//                    return response.json();
-//                }).then(plotMarkers);
-//        }
-        function plotMarkers(places) {
+        function addPlaces(places) {
 
             allPlaces = places;
-//            if(markers) {
-//                for (var i = 0; i < markers.length; i++) {
-//                    markers[i].setMap(null);
-//                }
-//            }
-//
-//            markers = [];
-//            bounds = new google.maps.LatLngBounds();
-
-//            nextPageToken = places.nextPageToken;
-//            console.log(nextPageToken);
-
-//            places.results.forEach(function (p) {
-            //create text windows for marker
-//                var contentString = `Name: ${p.name}<br>
-//                Found at Location: ${p.geometry.location.lat}, ${p.geometry.location.lng}
-//                `;
-//                var position = new google.maps.LatLng(p.geometry.location.lat, p.geometry.location.lng);
-//                var infoWindow = new google.maps.InfoWindow({
-//                    content: contentString
-//                });
-//
-//                var marker = new google.maps.Marker({
-//                    position: position,
-//                    map: map,
-//                    infoWindow: infoWindow
-//                });
-//                marker.addListener("mouseover", () => {
-//                    infoWindow.open(map, marker);
-//                });
-//                marker.addListener("mouseout", () => {
-//                    infoWindow.close(map, marker);
-//                });
-//                markers.push(
-//                    marker
-//                );
-//                bounds.extend(position);
-//                map.fitBounds(bounds);
-//                $("#listPlaces ul").append(
-//                    $('<li>').append(
-//                        $('<img>').attr('src', p.icon.toString())
-//                    ).append(
-//                        $('<h3>').append(p.name)
-//                    ).append(
-//                        $('<p>').append(p.vicinity)
-//                    )
-//                );
-//            })
-
 
             $('#pagination-container').pagination({
                 dataSource: places,
                 pageSize: 20,
                 callback: function(data, pagination) {
-                    var html = simpleTemplating(data);
+                    var html = renderPlaces(data);
                     $('#data-container').html(html);
                 }
             })
         }
 
-        function simpleTemplating(data) {
+        function renderPlaces(data) {
             if(markers) {
                 for (var i = 0; i < markers.length; i++) {
                     markers[i].setMap(null);
