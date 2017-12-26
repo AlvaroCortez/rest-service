@@ -10,22 +10,24 @@
     <script type="text/javascript" th:src="@{/js/jquery-2.1.3.min.js}"></script>
 </head>
 <body>
-<div id="listPlaces">
+<!--<div id="listPlaces">
     <ul>
 
     </ul>
-</div>
+</div>-->
 <div class="controls">
 </div>
 
 <div id="data-container"></div>
+<div class="sort-buttons__container">
+    <button id="sortByDistance" class="button-simple search" type="submit">Top Distance</button>
+    <button id="sortByDistanceUI" class="button-simple search" type="submit">Top Distance UI</button>
+</div>
 <div id="pagination-container"></div>
-<button id="sortByDistance" class="button-simple search" type="submit">Top Distance</button>
-<button id="sortByDistanceUI" class="button-simple search" type="submit">Top Distance UI</button>
 <input id="pac-input" class="controls input-row _location" type="text" placeholder="Enter a location"/>
 <input id="radius" class="controls input-row _radius" type="text" placeholder="Enter a radius(m)"/>
 <input id="duration" class="controls input-row _duration" type="text" placeholder="Enter a duration(h)"/>
-<select id="type">
+<select id="type" class="controls select-simple _place-type">
     <!--<option selected="selected" value="">All</option>-->
     <option value="amusement_park">Amusement Park</option>
     <option value="art_gallery">Art Gallery</option>

@@ -6,13 +6,21 @@ html, body {
 }
 
 .input-row._radius{
-    left: 490px !important;
+    left: 390px !important;
     top: 0 !important;
+    width: 120px;
+}
+
+.input-row._duration{
+    left: 525px !important;
+    top: 0 !important;
+    width: 120px;
 }
 
 .input-row._location{
     left: 135px !important;
     top: 0 !important;
+    width: 240px;
 }
 
 .input-row{
@@ -28,7 +36,7 @@ html, body {
 }
 
 .button-simple{
-    top: 9px !important;
+    top: 10px !important;
     height: 30px;
     background-color: #48afa1;
     border: 1px solid #418678;
@@ -37,11 +45,23 @@ html, body {
 }
 
 .button-simple.search{
-    left: 860px !important;
+    left: 660px !important;
 }
 
 .button-simple.search-next{
-    left: 935px !important;
+    left: 727px !important;
+    width: 145px;
+}
+
+.select-simple{
+    height: 30px;
+    border: 1px solid #48afa1;
+    border-radius: 4px;
+}
+
+.select-simple._place-type{
+    top: 40px !important;
+    left: 135px !important;
 }
 
 .controls {
@@ -49,12 +69,10 @@ html, body {
     box-sizing: border-box;
     font-family: Roboto;
     font-weight: 300;
-    margin-left: 17px;
     margin-top: 10px;
     outline: none;
     overflow: hidden;
     text-overflow: ellipsis;
-    width: 330px;
 }
 
 .controls:focus {
@@ -64,14 +82,10 @@ html, body {
     font-weight: bold;
 }
 
-.button-simple {
-    left: 600px;
-    top: 10px;
-}
 ul {
     list-style-type: none;
     margin-top: 0;
-    height: 600px;
+    height: 570px;
     overflow: auto;
     position: relative;
 }
@@ -81,25 +95,28 @@ li:hover {
     cursor: pointer;
 }
 #map{
-    height: 100%;
+    height: 570px;
     width: 60%;
     display: inline-block;
 }
 
 #data-container {
      display: inline-block;
-     width: 30%;
-     height: 100%;
+     width: 20%;
      vertical-align: top;
      float: left;
  }
 
 #pagination-container {
-    display: inline-block;
-    width: 30%;
-    height: 100%;
+    display: block;
     vertical-align: top;
-    float: left;
+    width: 20%;
+    height: 0;
+}
+
+.paginationjs-prev, .paginationjs-page, .paginationjs-next {
+    display: inline-block;
+    margin: 10px;
 }
 
 #data-container img{
