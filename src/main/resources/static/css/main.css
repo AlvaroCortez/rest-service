@@ -129,6 +129,7 @@ li:hover {
     width: calc(80% - 310px);
     display: inline-block;
     vertical-align: top;
+    margin-top: -40px;
 }
 
 #data-container {
@@ -173,6 +174,7 @@ li:hover {
     font: bold 16px/1.5 Helvetica, Verdana, sans-serif;
     margin: 0 0 0 15px;
     max-width: calc(100% - 50px);
+    color: #2d7b69;
 }
 
 #data-container li {
@@ -210,4 +212,14 @@ li:hover {
 
 iframe {
     height: 565px !important;
+    margin-top: -40px;
+}
+
+iframe .mewtwo-widget .mewtwo-flights{
+    border: 2px solid !important;
+}
+
+.sort-buttons__container {
+    display: none;
+    margin: 20px 0 10px 50px;
 }

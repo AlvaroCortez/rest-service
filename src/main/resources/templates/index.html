@@ -18,11 +18,11 @@
 <div class="controls">
 </div>
 
-<div id="data-container"></div>
-<div class="sort-buttons__container">
+<div class="sort-buttons__container jsSortButtons">
     <button id="sortByDistanceUI" class="button-simple search" type="submit">Top Distance</button>
     <button id="sortByDurationUI" class="button-simple search" type="submit">Top Duration</button>
 </div>
+<div id="data-container"></div>
 <div id="pagination-container"></div>
 <input id="placeLocation" class="controls input-row _location" type="text" placeholder="Enter a location"/>
 <input id="radius" class="controls input-row _radius" type="text" placeholder="Enter a radius(m)"/>
@@ -131,6 +131,7 @@
                 callback: function(data, pagination) {
                     var html = renderPlaces(data);
                     $('#data-container').html(html);
+                    $('jsSortButtons').css('display','block')
                 }
             })
         }
