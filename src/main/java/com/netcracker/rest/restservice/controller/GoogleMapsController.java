@@ -26,10 +26,30 @@ public class GoogleMapsController {
     @RequestMapping(value = "find", method = RequestMethod.GET)
     public List<Place> findPlaces(@RequestParam(name = "lat") String lat,
                                   @RequestParam(name = "lng") String lng,
-                                  @RequestParam(name = "radius") int radius,
-                                  @RequestParam(name = "duration") int hours,
-                                  @RequestParam(name = "type") String type
+                                  @RequestParam(name = "radius", required = false) Integer radius,
+                                  @RequestParam(name = "duration", required = false) Integer hours,
+                                  @RequestParam(name = "type") String type,
+                                  @RequestParam(name = "carGasolinePrice") Double carGasolinePrice,
+                                  @RequestParam(name = "carGasolineConsumption") Double carGasolineConsumption
     ) throws InterruptedException, ApiException, IOException {
-        return googleMapsService.findPlaces(lat, lng, radius, type, hours);
+        if(radius == null) {
+            radius = 5000;
+        }
+        if(hours == null) {
+            hours = 600;
+        }
+        if(carGasolinePrice == null) {
+            carGasolinePrice = 35d;
+        }
+        if(carGasolineConsumption == null) {
+            carGasolineConsumption = 0.1;
+        }
+        return googleMapsService.findPlaces(lat, lng, radius, type, hours, carGasolinePrice, carGasolineConsumption);
+    }
+    @RequestMapping(value = "findLucky", method = RequestMethod.GET)
+    public Place findLuckyPlace(@RequestParam(name = "lat") String lat,
+                                @RequestParam(name = "lng") String lng) throws InterruptedException, ApiException, IOException {
+
+        return googleMapsService.findLuckyPlace(lat, lng);
     }
 }

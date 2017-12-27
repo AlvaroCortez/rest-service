@@ -24,9 +24,10 @@
 </div>
 <div id="data-container"></div>
 <div id="pagination-container"></div>
+<form>
 <input id="placeLocation" class="controls input-row _location" type="text" placeholder="Enter a location"/>
-<input id="radius" class="controls input-row _radius" type="text" placeholder="Enter a radius(m)"/>
-<input id="duration" class="controls input-row _duration" type="text" placeholder="Enter a duration(h)"/>
+<input id="radius" class="controls input-row _radius" type="number" min="1" max="50000" placeholder="Enter a radius(m)"/>
+<input id="duration" class="controls input-row _duration" type="number" min="1" placeholder="Enter a duration(h)"/>
 <select id="type" class="controls select-simple _place-type">
     <!--<option selected="selected" value="">All</option>-->
     <option value="amusement_park">Amusement Park</option>
@@ -41,10 +42,10 @@
     <option value="spa">Spa</option>
     <option value="zoo">Zoo</option>
 </select>
-<input id="carGasolinePrice" class="controls input-row gasoline-price" type="text" placeholder="Enter a car gasoline price"/>
-<input id="carGasolineConsumption" class="controls input-row gasoline-consumption" type="text" placeholder="Enter a car gasoline consumtion"/>
-<input id="carAverageSpeed" class="controls input-row speed" type="text" placeholder="Enter a car average speed"/>
+<input id="carGasolinePrice" class="controls input-row gasoline-price" type="number" placeholder="Enter a car gasoline price"/>
+<input id="carGasolineConsumption" class="controls input-row gasoline-consumption" type="number" placeholder="Enter a car gasoline consumtion"/>
 <button id="search" class="button-simple search" type="submit">Search</button>
+</form>
 <button id="luckySearch" class="button-simple lucky" type="submit">I'm lucky!</button>
 <iframe scrolling="no" width="" height="254" frameborder="0" src="//www.travelpayouts.com/widgets/fa670bcb662a07fd4a8ad2d55d3f9788.html?v=1139"></iframe>
 <div id="map"></div>
@@ -84,7 +85,6 @@
         var luckySearchButton = document.getElementById('luckySearch');
         var inputCarGasolinePrice = document.getElementById('carGasolinePrice');
         var inputCarGasolineConsumption = document.getElementById('carGasolineConsumption');
-        var inputCarAverageSpeed = document.getElementById('carAverageSpeed');
 
         autocomplete = new google.maps.places.Autocomplete(inputLocation);
         autocomplete.bindTo('bounds', map);
@@ -95,7 +95,6 @@
         map.controls[google.maps.ControlPosition.TOP_LEFT].push(selectType);
         map.controls[google.maps.ControlPosition.TOP_LEFT].push(inputCarGasolinePrice);
         map.controls[google.maps.ControlPosition.TOP_LEFT].push(inputCarGasolineConsumption);
-        map.controls[google.maps.ControlPosition.TOP_LEFT].push(inputCarAverageSpeed);
         map.controls[google.maps.ControlPosition.TOP_LEFT].push(searchButton);
         map.controls[google.maps.ControlPosition.TOP_RIGHT].push(luckySearchButton);
 
@@ -114,10 +113,23 @@
 
         function fetchPlaces(evt) {
             evt.preventDefault();
-            fetch(`/api/places/find?lat=${initLat()}&lng=${initLng()}&radius=${inputRadius.value}&duration=${inputDuration.value}&type=${selectType.value}`)
+            validateParams();
+            fetch(`/api/places/find?lat=${initLat()}&lng=${initLng()}&radius=${inputRadius.value}&duration=${inputDuration.value}&type=${selectType.value}&carGasolinePrice=${inputCarGasolinePrice.value}&carGasolineConsumption=${inputCarGasolineConsumption.value}`)
                 .then(function (response) {
                     return response.json();
                 }).then(addPlaces);
+        }
+
+        function validateParams() {
+            if(inputRadius.value > 50000) {
+                inputRadius.value = 50000;
+            }
+            if(inputRadius.value < 0) {
+                inputRadius.value = 0;
+            }
+            if (inputDuration.value < 0) {
+                inputDuration.value = 0;
+            }
         }
 
 
@@ -128,7 +140,7 @@
 //            var sortedPlaces = allPlaces;
             $('#pagination-container').pagination({
                 dataSource: allPlaces,
-                pageSize: 20,
+                pageSize: 10,
                 callback: function(data, pagination) {
                     var html = renderPlaces(data);
                     $('#data-container').html(html);
@@ -143,7 +155,7 @@
 //            var sortedPlaces = allPlaces;
             $('#pagination-container').pagination({
                 dataSource: allPlaces,
-                pageSize: 20,
+                pageSize: 10,
                 callback: function(data, pagination) {
                     var html = renderPlaces(data);
                     $('#data-container').html(html);
@@ -157,7 +169,7 @@
 
             $('#pagination-container').pagination({
                 dataSource: places,
-                pageSize: 20,
+                pageSize: 10,
                 callback: function(data, pagination) {
                     var html = renderPlaces(data);
                     $('#data-container').html(html);

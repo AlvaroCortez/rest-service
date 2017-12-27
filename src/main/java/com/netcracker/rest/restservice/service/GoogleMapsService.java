@@ -15,6 +15,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 
 @Slf4j
 @Service
@@ -36,7 +37,9 @@ public class GoogleMapsService {
                                   String lng,
                                   int radius,
                                   String type,
-                                  int hours
+                                  int hours,
+                                  Double carGasolinePrice,
+                                  Double carGasolineConsumption
     ) throws InterruptedException, ApiException, IOException {
         List<Place> places = new ArrayList<>();
         long hoursInSeconds = hours * MINUTES_PER_HOUR * SECONDS_PER_MINUTE;
@@ -45,12 +48,12 @@ public class GoogleMapsService {
                 radius(radius).
                 type(PlaceType.valueOf(type.toUpperCase())).
                 await();
-        places.addAll(filterDuration(placesSearchResponse, currentPosition, hoursInSeconds));
+        places.addAll(filterDuration(placesSearchResponse, currentPosition, hoursInSeconds, carGasolinePrice, carGasolineConsumption));
         while (placesSearchResponse != null && placesSearchResponse.nextPageToken != null) {
             placesSearchResponse = PlacesApi.nearbySearchNextPage(context, placesSearchResponse.nextPageToken)
                     .awaitIgnoreError();
             if(placesSearchResponse != null) {
-                places.addAll(filterDuration(placesSearchResponse, currentPosition, hoursInSeconds));
+                places.addAll(filterDuration(placesSearchResponse, currentPosition, hoursInSeconds, carGasolinePrice, carGasolineConsumption));
             }
         }
 //      DistanceMatrix matrix = DistanceMatrixApi.newRequest(context).origins(currentPosition).destinations().await();
@@ -59,7 +62,9 @@ public class GoogleMapsService {
 
     private List<Place> filterDuration(PlacesSearchResponse placesSearchResponse,
                                        LatLng currentPosition,
-                                       long hoursInSeconds
+                                       long hoursInSeconds,
+                                       Double carGasolinePrice,
+                                       Double carGasolineConsumption
     ) throws InterruptedException, ApiException, IOException {
         List<Place> places = new ArrayList<>();
         int countPlaces = placesSearchResponse.results.length;
@@ -78,7 +83,7 @@ public class GoogleMapsService {
         for (PlacesSearchResult result : placesSearchResponse.results) {
             DistanceMatrixElement destinationPlace = matrix.rows[0].elements[i++];
             if (destinationPlace.duration.inSeconds < hoursInSeconds) {
-                long longPrice = (long) (destinationPlace.distance.inMeters * AVERAGE_PRICE_OF_GASOLINE / METERS_PER_KILOMETER * LITERS_PER_KILOMETER);
+                long longPrice = (long) (destinationPlace.distance.inMeters * carGasolinePrice / METERS_PER_KILOMETER * carGasolineConsumption);
                 BigDecimal price = BigDecimal.valueOf(longPrice);
                 Place place = new Place(result.geometry.location.lat,
                                         result.geometry.location.lng,
@@ -93,5 +98,50 @@ public class GoogleMapsService {
             }
         }
         return places;
+    }
+
+    public Place findLuckyPlace(String lat, String lng) throws InterruptedException, ApiException, IOException {
+//        double lat = getRandomNumberInRange(-90, 90);
+//        double lng = getRandomNumberInRange(-180, 180);
+        LatLng currentPosition = new LatLng(Double.parseDouble(lat), Double.parseDouble(lng));
+        PlacesSearchResponse placesSearchResponse = PlacesApi.nearbySearchQuery(context, currentPosition).await();
+        int placesNumber = getIntRandomNumberInRange(1, 20);
+        PlacesSearchResult result = placesSearchResponse.results[placesNumber];
+        DistanceMatrix matrix = DistanceMatrixApi.newRequest(context)
+                .origins(currentPosition)
+                .destinations(result.geometry.location)
+                .await();
+        long longPrice = (long) (matrix.rows[0].elements[0].distance.inMeters * AVERAGE_PRICE_OF_GASOLINE / METERS_PER_KILOMETER * LITERS_PER_KILOMETER);
+        BigDecimal price = BigDecimal.valueOf(longPrice);
+        Place place = new Place(result.geometry.location.lat,
+                                result.geometry.location.lng,
+                                result.name,
+                                result.vicinity,
+                                result.icon,
+                                matrix.rows[0].elements[0].duration,
+                                matrix.rows[0].elements[0].distance,
+                                price
+        );
+        return place;
+    }
+
+    private static int getIntRandomNumberInRange(int min, int max) {
+
+        if (min >= max) {
+            throw new IllegalArgumentException("max must be greater than min");
+        }
+
+        Random r = new Random();
+        return r.nextInt()*((max - min) + 1) + min;
+    }
+
+    private static double getDoubleRandomNumberInRange(double min, double max) {
+
+        if (min >= max) {
+            throw new IllegalArgumentException("max must be greater than min");
+        }
+
+        Random r = new Random();
+        return r.nextDouble()*((max - min) + 1) + min;
     }
 }
