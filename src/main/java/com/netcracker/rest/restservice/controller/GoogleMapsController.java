@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 
 @RestController
@@ -47,9 +48,9 @@ public class GoogleMapsController {
         return googleMapsService.findPlaces(lat, lng, radius, type, hours, carGasolinePrice, carGasolineConsumption);
     }
     @RequestMapping(value = "findLucky", method = RequestMethod.GET)
-    public Place findLuckyPlace(@RequestParam(name = "lat") String lat,
+    public List<Place> findLuckyPlace(@RequestParam(name = "lat") String lat,
                                 @RequestParam(name = "lng") String lng) throws InterruptedException, ApiException, IOException {
 
-        return googleMapsService.findLuckyPlace(lat, lng);
+        return Collections.singletonList(googleMapsService.findLuckyPlace(lat, lng));
     }
 }

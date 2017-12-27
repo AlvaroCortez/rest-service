@@ -104,7 +104,7 @@ public class GoogleMapsService {
 //        double lat = getRandomNumberInRange(-90, 90);
 //        double lng = getRandomNumberInRange(-180, 180);
         LatLng currentPosition = new LatLng(Double.parseDouble(lat), Double.parseDouble(lng));
-        PlacesSearchResponse placesSearchResponse = PlacesApi.nearbySearchQuery(context, currentPosition).await();
+        PlacesSearchResponse placesSearchResponse = PlacesApi.nearbySearchQuery(context, currentPosition).radius(50000).await();
         int placesNumber = getIntRandomNumberInRange(1, 20);
         PlacesSearchResult result = placesSearchResponse.results[placesNumber];
         DistanceMatrix matrix = DistanceMatrixApi.newRequest(context)
@@ -132,7 +132,7 @@ public class GoogleMapsService {
         }
 
         Random r = new Random();
-        return r.nextInt()*((max - min) + 1) + min;
+        return r.nextInt(((max - min) + 1)) + min;
     }
 
     private static double getDoubleRandomNumberInRange(double min, double max) {
