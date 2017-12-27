@@ -108,8 +108,17 @@
             console.log(initLat())
         });
         searchButton.addEventListener("click", fetchPlaces);
+        luckySearchButton.addEventListener("click", fetchLuckyPlace);
         sortByDistanceButtonUI.addEventListener("click", sortByDistanceUI);
         sortByDurationButtonUI.addEventListener("click", sortByDurationUI);
+
+        function fetchLuckyPlace(evt) {
+            evt.preventDefault();
+            fetch(`/api/places/findLucky?lat=${initLat()}&lng=${initLng()}`)
+                .then(function (response) {
+                    return response.json();
+                }).then(addPlaces);
+        }
 
         function fetchPlaces(evt) {
             evt.preventDefault();
